@@ -20,8 +20,10 @@ import type { AuthUser } from '@/types'
 export function Header() {
   const { isOpen } = useSidebarStore()
   const [user, setUser] = useState<AuthUser | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     // Buscar dados do usuário do cookie
     const userCookie = document.cookie
       .split('; ')
@@ -40,6 +42,23 @@ export function Header() {
   const initials = user
     ? `${user.firstname[0]}${user.lastname[0]}`.toUpperCase()
     : 'U'
+
+  // Evita hydration mismatch - só renderiza o dropdown depois de montar no client
+  if (!mounted) {
+    return (
+      <header
+        className={cn(
+          'fixed top-0 right-0 z-30 flex h-16 items-center justify-between border-b bg-white px-6 transition-all duration-300',
+          isOpen ? 'left-64' : 'left-16'
+        )}
+      >
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900">Backoffice</h2>
+        </div>
+        <div className="h-8 w-8 rounded-full bg-slate-200 animate-pulse" />
+      </header>
+    )
+  }
 
   return (
     <header
